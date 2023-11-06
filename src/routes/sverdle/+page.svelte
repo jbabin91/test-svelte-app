@@ -1,9 +1,7 @@
 <script lang="ts">
   import { confetti } from '@neoconfetti/svelte';
-
   import { enhance } from '$app/forms';
-
-  import type { ActionData,PageData } from './$types';
+  import type { PageData, ActionData } from './$types';
   import { reduced_motion } from './reduced-motion';
 
   export let data: PageData;
@@ -14,10 +12,10 @@
   $: won = data.answers.at(-1) === 'xxxxx';
 
   /** The index of the current guess */
-  $: index = won ? -1 : data.answers.length;
+  $: i = won ? -1 : data.answers.length;
 
   /** The current guess */
-  $: currentGuess = data.guesses[index] || '';
+  $: currentGuess = data.guesses[i] || '';
 
   /** Whether the current guess can be submitted */
   $: submittable = currentGuess.length === 5;
@@ -38,21 +36,21 @@
     classnames = {};
     description = {};
 
-    for (const [index_, answer] of data.answers.entries()) {
-      const guess = data.guesses[index_];
+    data.answers.forEach((answer, i) => {
+      const guess = data.guesses[i];
 
-      for (let index_ = 0; index_ < 5; index_ += 1) {
-        const letter = guess[index_];
+      for (let i = 0; i < 5; i += 1) {
+        const letter = guess[i];
 
-        if (answer[index_] === 'x') {
+        if (answer[i] === 'x') {
           classnames[letter] = 'exact';
           description[letter] = 'correct';
         } else if (!classnames[letter]) {
-          classnames[letter] = answer[index_] === 'c' ? 'close' : 'missing';
-          description[letter] = answer[index_] === 'c' ? 'present' : 'absent';
+          classnames[letter] = answer[i] === 'c' ? 'close' : 'missing';
+          description[letter] = answer[i] === 'c' ? 'present' : 'absent';
         }
       }
-    }
+    });
   }
 
   /**
@@ -60,7 +58,7 @@
    * if client-side JavaScript is enabled
    */
   function update(event: MouseEvent) {
-    const key = event.target as HTMLButtonElement.dataset.key;
+    const key = (event.target as HTMLButtonElement).getAttribute('data-key');
 
     if (key === 'backspace') {
       currentGuess = currentGuess.slice(0, -1);
@@ -107,11 +105,11 @@
   <a class="how-to-play" href="/sverdle/how-to-play">How to play</a>
 
   <div class="grid" class:playing={!won} class:bad-guess={form?.badGuess}>
-    {#each [...Array.from({length: 6}).keys()] as row (row)}
-      {@const current = row === index}
+    {#each Array.from(Array(6).keys()) as row (row)}
+      {@const current = row === i}
       <h2 class="visually-hidden">Row {row + 1}</h2>
       <div class="row" class:current>
-        {#each [...Array.from({length: 5}).keys()] as column (column)}
+        {#each Array.from(Array(5).keys()) as column (column)}
           {@const guess = current ? currentGuess : data.guesses[row]}
           {@const answer = data.answers[row]?.[column]}
           {@const value = guess?.[column] ?? ''}
@@ -119,7 +117,13 @@
           {@const exact = answer === 'x'}
           {@const close = answer === 'c'}
           {@const missing = answer === '_'}
-          <div class="letter" class:exact class:close class:missing class:selected>
+          <div
+            class="letter"
+            class:exact
+            class:close
+            class:missing
+            class:selected
+          >
             {value}
             <span class="visually-hidden">
               {#if exact}
@@ -149,7 +153,11 @@
       </button>
     {:else}
       <div class="keyboard">
-        <button data-key="enter" class:selected={submittable} disabled={!submittable}>enter</button>
+        <button
+          data-key="enter"
+          class:selected={submittable}
+          disabled={!submittable}>enter</button
+        >
 
         <button
           on:click|preventDefault={update}
@@ -188,11 +196,11 @@
   <div
     style="position: absolute; left: 50%; top: 30%"
     use:confetti={{
-      colors: ['#ff3e00', '#40b3ff', '#676778'],
-      force: 0.7,
       particleCount: $reduced_motion ? 0 : undefined,
+      force: 0.7,
+      stageWidth: window.innerWidth,
       stageHeight: window.innerHeight,
-      stageWidth: window.innerWidth
+      colors: ['#ff3e00', '#40b3ff', '#676778'],
     }}
   />
 {/if}

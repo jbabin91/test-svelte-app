@@ -57,12 +57,12 @@ export const actions = {
     const data = await request.formData();
     const key = data.get('key');
 
-    const index = game.answers.length;
+    const i = game.answers.length;
 
     if (key === 'backspace') {
-      game.guesses[index] = game.guesses[index].slice(0, -1);
+      game.guesses[i] = game.guesses[i].slice(0, -1);
     } else {
-      game.guesses[index] += key;
+      game.guesses[i] += key;
     }
 
     cookies.set('sverdle', game.toString());

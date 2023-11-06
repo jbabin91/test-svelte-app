@@ -9,7 +9,7 @@ export class Game {
   /**
    * Create a game object from the player's cookie, or initialise a new game
    */
-  constructor(serialized?: string | undefined) {
+  constructor(serialized?: string) {
     if (serialized) {
       const [index, guesses, answers] = serialized.split('-');
 
@@ -41,21 +41,21 @@ export class Game {
     const answer = Array.from({ length: 5 }).fill('_');
 
     // first, find exact matches
-    for (let index = 0; index < 5; index += 1) {
-      if (letters[index] === available[index]) {
-        answer[index] = 'x';
-        available[index] = ' ';
+    for (let i = 0; i < 5; i += 1) {
+      if (letters[i] === available[i]) {
+        answer[i] = 'x';
+        available[i] = ' ';
       }
     }
 
     // then find close matches (this has to happen
     // in a second step, otherwise an early close
     // match can prevent a later exact match)
-    for (let index_ = 0; index_ < 5; index_ += 1) {
-      if (answer[index_] === '_') {
-        const index = available.indexOf(letters[index_]);
+    for (let i = 0; i < 5; i += 1) {
+      if (answer[i] === '_') {
+        const index = available.indexOf(letters[i]);
         if (index !== -1) {
-          answer[index_] = 'c';
+          answer[i] = 'c';
           available[index] = ' ';
         }
       }
